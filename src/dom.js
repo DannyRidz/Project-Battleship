@@ -88,17 +88,30 @@ function createPlacementControls(game, root) {
   return controls;
 }
 
-function createRestartButton(game, root) {
-  const restartButton = document.createElement("button");
-  restartButton.type = "button";
-  restartButton.classList.add("restart");
-  restartButton.textContent = "Place new fleets";
-  restartButton.addEventListener("click", () => {
+function createModeButtons(game, root) {
+  const controls = document.createElement("div");
+  controls.classList.add("game-actions");
+
+  const computerButton = document.createElement("button");
+  computerButton.type = "button";
+  computerButton.classList.add("restart");
+  computerButton.textContent = "New game vs computer";
+  computerButton.addEventListener("click", () => {
     game.startPlacement();
     renderGame(game, root);
   });
 
-  return restartButton;
+  const twoPlayerButton = document.createElement("button");
+  twoPlayerButton.type = "button";
+  twoPlayerButton.classList.add("restart");
+  twoPlayerButton.textContent = "New two-player game";
+  twoPlayerButton.addEventListener("click", () => {
+    game.startTwoPlayer();
+    renderGame(game, root);
+  });
+
+  controls.append(computerButton, twoPlayerButton);
+  return controls;
 }
 
 function renderGame(game, root) {
@@ -110,6 +123,20 @@ function renderGame(game, root) {
   const status = document.createElement("p");
   status.classList.add("status");
   status.textContent = game.message;
+
+  if (game.mode === "two-player" && game.awaitingPass) {
+    const readyButton = document.createElement("button");
+    readyButton.type = "button";
+    readyButton.classList.add("restart");
+    readyButton.textContent = "I am ready";
+    readyButton.addEventListener("click", () => {
+      game.continueTurn();
+      renderGame(game, root);
+    });
+
+    root.append(heading, status, readyButton, createModeButtons(game, root));
+    return;
+  }
 
   if (game.phase === "placement") {
     const playerSection = document.createElement("section");
@@ -133,34 +160,49 @@ function renderGame(game, root) {
       status,
       createPlacementControls(game, root),
       playerSection,
-      createRestartButton(game, root),
+      createModeButtons(game, root),
     );
-
     return;
   }
 
   const boards = document.createElement("div");
   boards.classList.add("boards");
 
+  let activePlayer = game.human;
+  let defendingPlayer = game.computer;
+  let playerLabel = "Your fleet";
+  let enemyLabel = "Enemy waters";
+  let attackHandler = (coordinate) => game.humanAttack(coordinate);
+
+  if (game.mode === "two-player") {
+    const playerOneTurn = game.currentPlayer === "human";
+
+    activePlayer = playerOneTurn ? game.human : game.computer;
+    defendingPlayer = playerOneTurn ? game.computer : game.human;
+    playerLabel = playerOneTurn ? "Player 1 fleet" : "Player 2 fleet";
+    enemyLabel = playerOneTurn ? "Player 2 waters" : "Player 1 waters";
+    attackHandler = (coordinate) => game.twoPlayerAttack(coordinate);
+  }
+
   const playerSection = document.createElement("section");
   const playerHeading = document.createElement("h2");
-  playerHeading.textContent = "Your fleet";
+  playerHeading.textContent = playerLabel;
   playerSection.append(
     playerHeading,
-    createBoard(game.human.gameboard, true, null, null),
+    createBoard(activePlayer.gameboard, true, null, null),
   );
 
-  const computerSection = document.createElement("section");
-  const computerHeading = document.createElement("h2");
-  computerHeading.textContent = "Enemy waters";
-  computerSection.append(
-    computerHeading,
+  const enemySection = document.createElement("section");
+  const enemyHeading = document.createElement("h2");
+  enemyHeading.textContent = enemyLabel;
+  enemySection.append(
+    enemyHeading,
     createBoard(
-      game.computer.gameboard,
+      defendingPlayer.gameboard,
       false,
       game.phase === "playing"
         ? (coordinate) => {
-            game.humanAttack(coordinate);
+            attackHandler(coordinate);
             renderGame(game, root);
           }
         : null,
@@ -168,9 +210,9 @@ function renderGame(game, root) {
     ),
   );
 
-  boards.append(playerSection, computerSection);
+  boards.append(playerSection, enemySection);
 
-  root.append(heading, status, boards, createRestartButton(game, root));
+  root.append(heading, status, boards, createModeButtons(game, root));
 }
 
 export default renderGame;

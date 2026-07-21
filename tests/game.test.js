@@ -75,4 +75,29 @@ describe("Game", () => {
     expect(game.pendingFleet).toHaveLength(0);
     expect(game.phase).toBe("playing");
   });
+
+  test("starts local two-player mode behind a pass-device screen", () => {
+    const game = new Game(() => 0);
+
+    game.startTwoPlayer();
+
+    expect(game.mode).toBe("two-player");
+    expect(game.currentPlayer).toBe("human");
+    expect(game.awaitingPass).toBe(true);
+    expect(game.human.gameboard.ships).toHaveLength(5);
+    expect(game.computer.gameboard.ships).toHaveLength(5);
+  });
+
+  test("switches players after a legal two-player attack", () => {
+    const game = new Game(() => 0);
+    game.startTwoPlayer();
+    game.continueTurn();
+
+    const result = game.twoPlayerAttack([9, 9]);
+
+    expect(result).toBe("miss");
+    expect(game.currentPlayer).toBe("computer");
+    expect(game.awaitingPass).toBe(true);
+    expect(game.computer.gameboard.attacks.has("9,9")).toBe(true);
+  });
 });
