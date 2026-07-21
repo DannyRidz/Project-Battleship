@@ -8,6 +8,8 @@ class Game {
     this.phase = "setup";
     this.winner = null;
     this.message = "Start a new game.";
+    this.pendingFleet = [];
+    this.placementOrientation = "horizontal";
   }
 
   start() {
@@ -19,6 +21,59 @@ class Game {
 
     this.placeRandomFleet(this.human.gameboard);
     this.placeRandomFleet(this.computer.gameboard);
+  }
+
+  startPlacement() {
+    this.human = new Player("human");
+    this.computer = new Player("computer");
+    this.phase = "placement";
+    this.winner = null;
+    this.pendingFleet = [5, 4, 3, 3, 2];
+    this.placementOrientation = "horizontal";
+    this.message = "Drag each ship onto your board.";
+
+    this.placeRandomFleet(this.computer.gameboard);
+  }
+
+  toggleOrientation() {
+    this.placementOrientation =
+      this.placementOrientation === "horizontal" ? "vertical" : "horizontal";
+
+    return this.placementOrientation;
+  }
+
+  placeHumanShip(length, coordinate, orientation) {
+    if (this.phase !== "placement") {
+      return false;
+    }
+
+    const shipIndex = this.pendingFleet.indexOf(length);
+
+    if (shipIndex === -1) {
+      return false;
+    }
+
+    const placed = this.human.gameboard.placeShip(
+      length,
+      coordinate,
+      orientation,
+    );
+
+    if (!placed) {
+      this.message = "That ship does not fit there.";
+      return false;
+    }
+
+    this.pendingFleet.splice(shipIndex, 1);
+
+    if (this.pendingFleet.length === 0) {
+      this.phase = "playing";
+      this.message = "Fleet ready. Attack the computer board.";
+    } else {
+      this.message = "Ship placed. Continue placing your fleet.";
+    }
+
+    return true;
   }
 
   placeRandomFleet(gameboard) {

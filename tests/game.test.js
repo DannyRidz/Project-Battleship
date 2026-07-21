@@ -49,4 +49,30 @@ describe("Game", () => {
     expect(game.phase).toBe("finished");
     expect(game.winner).toBe("human");
   });
+
+  test("starts a drag-and-drop placement phase", () => {
+    const game = new Game(() => 0);
+
+    game.startPlacement();
+
+    expect(game.phase).toBe("placement");
+    expect(game.human.gameboard.ships).toHaveLength(0);
+    expect(game.computer.gameboard.ships).toHaveLength(5);
+    expect(game.pendingFleet).toEqual([5, 4, 3, 3, 2]);
+  });
+
+  test("enters play after placing the complete human fleet", () => {
+    const game = new Game(() => 0);
+    game.startPlacement();
+
+    game.placeHumanShip(5, [0, 0], "horizontal");
+    game.placeHumanShip(4, [1, 0], "horizontal");
+    game.placeHumanShip(3, [2, 0], "horizontal");
+    game.placeHumanShip(3, [3, 0], "horizontal");
+    game.placeHumanShip(2, [4, 0], "horizontal");
+
+    expect(game.human.gameboard.ships).toHaveLength(5);
+    expect(game.pendingFleet).toHaveLength(0);
+    expect(game.phase).toBe("playing");
+  });
 });

@@ -5,5 +5,5 @@ import renderGame from "./dom.js";
 const root = document.querySelector("#app");
 const game = new Game();
 
-game.start();
+game.startPlacement();
 renderGame(game, root);
