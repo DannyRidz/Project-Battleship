@@ -4,6 +4,8 @@ class Gameboard {
   constructor() {
     this.board = Array.from({ length: 10 }, () => Array(10).fill(null));
     this.ships = [];
+    this.attacks = new Set();
+    this.missedAttacks = new Set();
   }
 
   getCell([row, column]) {
@@ -52,6 +54,41 @@ class Gameboard {
 
     this.ships.push(ship);
     return true;
+  }
+
+  receiveAttack([row, column]) {
+    if (
+      !Number.isInteger(row) ||
+      !Number.isInteger(column) ||
+      row < 0 ||
+      row >= 10 ||
+      column < 0 ||
+      column >= 10
+    ) {
+      return "invalid";
+    }
+
+    const coordinateKey = `${row},${column}`;
+
+    if (this.attacks.has(coordinateKey)) {
+      return "repeat";
+    }
+
+    this.attacks.add(coordinateKey);
+
+    const ship = this.getCell([row, column]);
+
+    if (ship !== null) {
+      ship.hit();
+      return "hit";
+    }
+
+    this.missedAttacks.add(coordinateKey);
+    return "miss";
+  }
+
+  allShipsSunk() {
+    return this.ships.length > 0 && this.ships.every((ship) => ship.isSunk());
   }
 }
 
