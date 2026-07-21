@@ -1,13 +1,16 @@
 {
   "name": "project-battleship",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "build": "webpack --mode production",
+    "start": "webpack serve --mode development --open"
   },
   "keywords": [],
   "author": "",
