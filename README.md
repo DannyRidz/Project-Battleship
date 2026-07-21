@@ -12,3 +12,35 @@ A browser-based Battleship game built for The Odin Project.
 - Victory detection
 - Responsive gameboards
 - Unit-tested game logic
+
+## Install
+
+```bash
+npm install
+```
+
+## Run locally
+
+```bash
+npm start
+```
+
+## Run tests
+
+```bash
+npm test
+```
+
+## Create a production build
+
+```bash
+npm run build
+```
+
+## Architecture
+
+- `Ship` tracks a ship's length, hits, and sunk state.
+- `Gameboard` handles placement, attacks, misses, and fleet status.
+- `Player` owns a gameboard and provides computer attacks.
+- `Game` controls setup, turns, randomized fleets, and victory.
+- `dom.js` renders game state and handles browser interaction.
