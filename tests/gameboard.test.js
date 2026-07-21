@@ -42,3 +42,46 @@ describe("Gameboard ship placement", () => {
     expect(gameboard.ships).toHaveLength(1);
   });
 });
+
+describe("Gameboard attacks", () => {
+  test("hits a ship at an occupied coordinate", () => {
+    const gameboard = new Gameboard();
+    gameboard.placeShip(2, [1, 1], "horizontal");
+
+    const result = gameboard.receiveAttack([1, 1]);
+
+    expect(result).toBe("hit");
+    expect(gameboard.ships[0].hits).toBe(1);
+  });
+
+  test("records a missed attack", () => {
+    const gameboard = new Gameboard();
+
+    const result = gameboard.receiveAttack([3, 4]);
+
+    expect(result).toBe("miss");
+    expect(gameboard.missedAttacks.has("3,4")).toBe(true);
+  });
+
+  test("rejects a repeated attack without hitting twice", () => {
+    const gameboard = new Gameboard();
+    gameboard.placeShip(2, [1, 1], "horizontal");
+
+    gameboard.receiveAttack([1, 1]);
+    const result = gameboard.receiveAttack([1, 1]);
+
+    expect(result).toBe("repeat");
+    expect(gameboard.ships[0].hits).toBe(1);
+  });
+
+  test("reports when every ship has sunk", () => {
+    const gameboard = new Gameboard();
+    gameboard.placeShip(1, [0, 0], "horizontal");
+
+    expect(gameboard.allShipsSunk()).toBe(false);
+
+    gameboard.receiveAttack([0, 0]);
+
+    expect(gameboard.allShipsSunk()).toBe(true);
+  });
+});
