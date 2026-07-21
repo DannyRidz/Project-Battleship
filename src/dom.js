@@ -81,7 +81,7 @@ function renderGame(game, root) {
   const restartButton = document.createElement("button");
   restartButton.type = "button";
   restartButton.classList.add("restart");
-  restartButton.textContent = "New game";
+  restartButton.textContent = "Randomize fleets and start again";
   restartButton.addEventListener("click", () => {
     game.start();
     renderGame(game, root);
